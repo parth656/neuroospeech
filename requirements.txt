@@ -1,0 +1,7 @@
+streamlit==1.40.0
+supabase==2.10.0
+openai-whisper==20231117
+torch==2.4.1
+soundfile==0.12.1
+numpy==1.26.4
+pandas==2.2.3
