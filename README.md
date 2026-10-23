@@ -1,139 +1,71 @@
-# 🩺 NeuroSpeech — AI Speech Therapy Platform
+# NeuroSpeech — AI Speech Practice Platform
 
-> **Built for the Supabase Partner Program**
-> Showcases: Auth · PostgreSQL + RLS · Realtime · Storage · Edge Functions
+NeuroSpeech is a speech-practice application that combines a Streamlit interface with Supabase services for authentication, user-specific session history, storage, realtime updates, and Edge Functions for feedback and progress summaries.
 
----
+> This is a practice aid, not a clinical diagnostic system. AI feedback may be wrong and should not replace a qualified speech-language pathologist.
 
-## Features
+## Features documented by the project
 
-| Feature | Supabase Service Used |
+| Feature | Component |
 |---|---|
-| Email + Google login | **Supabase Auth** |
-| Session history per user | **PostgreSQL + RLS** (users only see their own data) |
-| Live leaderboard | **Realtime** subscriptions |
-| Audio recordings saved | **Supabase Storage** |
-| AI therapy feedback | **Edge Functions** (Deno) |
-| Weekly progress report | **Edge Functions** (Deno) |
-| Admin panel | **Service Role** + RLS `is_admin()` |
-| Daily streak tracking | **PostgreSQL function** |
+| Email and optional Google login | Supabase Auth |
+| Per-user session history | PostgreSQL with Row Level Security (RLS) |
+| Realtime progress/leaderboard updates | Supabase Realtime |
+| Audio recording storage | Supabase Storage |
+| Speech feedback and weekly progress | Supabase Edge Functions |
+| Streak tracking | PostgreSQL function |
+| Admin workflows | Role checks and database policies |
 
----
+Verify each feature against the deployed version before presenting it as production-ready.
 
-## Setup — 5 Steps
+## Requirements
 
-### 1. Create Supabase Project
-1. Go to [supabase.com](https://supabase.com) → New Project
-2. Pick a name, set a database password, choose a region
+- Python and the version supported by `requirements.txt`
+- Supabase project
+- Supabase CLI for Edge Function deployment
+- Optional AI provider key if enabled by the implementation
 
-### 2. Run the Schema
-1. In Supabase: **SQL Editor** → **New Query**
-2. Paste everything from `schema.sql`
-3. Click **Run**
+## Setup
 
-### 3. Enable Google OAuth (optional but impressive for demos)
-1. Supabase → **Authentication** → **Providers** → **Google**
-2. Paste your Google Client ID + Secret from [console.cloud.google.com](https://console.cloud.google.com)
-3. Add your site URL to: Authentication → URL Configuration
+1. Create a Supabase project.
+2. Review `schema.sql` and apply it to a development project.
+3. Configure Auth providers and redirect URLs.
+4. Copy `.env.example` to `.env` and set the required values.
+5. Install dependencies and launch the app:
 
-### 4. Get Your Keys
-Supabase → **Project Settings** → **API**
-- Copy `SUPABASE_URL`
-- Copy `anon / public` key → `SUPABASE_ANON_KEY`
-- Copy `service_role` key → `SUPABASE_SERVICE_KEY`
-
-### 5. Run Locally
 ```bash
-# Clone / copy files
-cd neurospeech
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-cp .env.example .env
-# Fill in your Supabase values
-
-# Run
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
----
+Use the exact variable names from `.env.example`; never paste real credentials into source files.
 
-## Deploy Edge Functions
+## Supabase Edge Functions
 
-```bash
-# Install Supabase CLI
-npm install -g supabase
+The documented functions are `analyze-speech` and `progress-report`. Install and authenticate the Supabase CLI, link the development project, then deploy the functions using the commands supported by the checked-in Supabase configuration.
 
-# Login
-supabase login
+## Critical security guidance
 
-# Link to your project
-supabase link --project-ref your-project-id
+- Never expose the Supabase service-role key in browser code or a public repository.
+- Store service-role credentials only in trusted server-side secrets.
+- Enforce RLS for every table containing user data and test cross-user access.
+- Restrict Storage policies so users cannot read or overwrite another user's recordings.
+- Do not make a user an admin solely by running a public client-side action.
+- Keep production and development projects separate; test schema changes before applying them to production.
+- Document audio retention, deletion, and consent clearly.
 
-# Deploy both functions
-supabase functions deploy analyze-speech
-supabase functions deploy progress-report
+## Validation checklist
 
-# Set secrets (if using OpenAI)
-supabase secrets set OPENAI_API_KEY=sk-...
-```
+- [ ] Test login, logout, and OAuth redirects.
+- [ ] Verify RLS and Storage isolation using two different accounts.
+- [ ] Test Edge Function errors and missing AI credentials.
+- [ ] Confirm data deletion and backup/restore behavior.
+- [ ] Add screenshots and an architecture diagram.
+- [ ] Record deployment instructions and known limitations.
 
-> **Works without OpenAI** — smart fallback feedback is built in so your demo runs immediately.
+## Project layout
 
----
-
-## Deploy to Streamlit Cloud (free live demo URL)
-
-1. Push code to a **public GitHub repo**
-2. Go to [share.streamlit.io](https://share.streamlit.io) → New App
-3. Select your repo + `app.py`
-4. Under **Advanced → Secrets**, paste your secrets from `.streamlit/secrets.toml`
-5. Click Deploy → get your live URL ✅
-
----
-
-## Make Yourself Admin
-
-In Supabase → SQL Editor:
-```sql
-UPDATE public.profiles
-SET role = 'admin'
-WHERE email = 'your@email.com';
-```
-
----
-
-## Supabase Partner Application Checklist
-
-- [x] Auth integration (email + Google OAuth)
-- [x] PostgreSQL with Row Level Security (users only see own data)
-- [x] Realtime subscriptions (leaderboard + streak updates)
-- [x] Storage (audio recordings per user)
-- [x] Edge Functions (AI feedback + progress reports)
-- [x] Database functions (streak tracking)
-- [x] Admin panel using service role
-- [x] Live demo URL (Streamlit Cloud)
-- [x] Public GitHub repo
-
----
-
-## File Structure
-
-```
-neurospeech/
-├── app.py                          ← Main Streamlit app (all pages)
-├── schema.sql                      ← Run once in Supabase SQL Editor
-├── requirements.txt
-├── .env.example
-├── .streamlit/
-│   └── secrets.toml                ← For Streamlit Cloud deploy
-└── supabase/
-    └── functions/
-        ├── analyze-speech/
-        │   └── index.ts            ← AI coaching feedback
-        └── progress-report/
-            └── index.ts            ← Weekly progress summary
-```
-# neuroospeech
+The existing README identifies `app.py`, `schema.sql`, `requirements.txt`, `.env.example`, Streamlit configuration, and Supabase Edge Functions as key files. Check the repository tree for the current exact structure.
